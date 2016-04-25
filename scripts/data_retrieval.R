@@ -57,6 +57,7 @@ legend("topleft", variableInfo$param_units,
 
 # Great but what about 15 min data?
 
+## custom functions
 source("scripts/functions/f_USGS_15min.R")
 
 # need to do this in about 5-6 yr chunks...too big otherwise
@@ -77,4 +78,46 @@ ggplot(data=dfALL,aes(datetime,flow_cms))+geom_line(col="maroon")+
   xlab("") + ylab("Flow (cms)") + theme_bw()+
   ggtitle(paste0("Merced at Happy Isles (USGS: 11264500): Discharge (cms)"))
 
+## lets save dataframe for future use
+save(dfALL, file = "./data/Merced_usgs_2006-2016.rda")
+
+
+# DO SOME DPLYR ----------------------------------------------------------
+
+## Make Hourly dataset
+df.hr<- df %>%
+  group_by(site,year, mon, yday, hour)%>%
+  dplyr::summarize(
+    "lev.avg"=mean(Level,na.rm=TRUE),
+    "lev.min"=min(Level,na.rm=TRUE),
+    "lev.max"=max(Level,na.rm=TRUE),
+    "temp.avg"=mean(Temperature,na.rm=TRUE),
+    "temp.min"=min(Temperature,na.rm=TRUE),
+    "temp.max"=max(Temperature,na.rm=TRUE))%>%
+  mutate("datetime"=ymd_hms(strptime(paste0(year,"-", mon,"-", yday, " ",
+                                            hour,":00"),format = "%Y-%m-%j %H:%M"))) %>%
+  select(datetime,year,mon,yday,lev.avg:temp.max) %>%
+  as.data.frame()
+
+
+## Make Daily dataset
+require(caTools)
+df.dy<-df %>%
+  group_by(site, year, mon, yday)%>%
+  dplyr::summarize("lev.avg"=mean(Level,na.rm=TRUE),
+                   "lev.min"=min(Level,na.rm=TRUE),
+                   "lev.max"=max(Level,na.rm=TRUE),
+                   "temp.avg"=mean(Temperature,na.rm=TRUE),
+                   "temp.min"=min(Temperature,na.rm=TRUE),
+                   "temp.max"=max(Temperature,na.rm=TRUE)) %>%
+  mutate("lev.7.avg"= runmean(lev.avg, k=7, endrule="mean",align="center"),
+         "lev.7.min"= runmin(lev.min, k=7, align="center"),
+         "lev.7.max"= runmax(lev.max, k=7, align="center"),
+         "temp.7.avg"= runmean(temp.avg, k=7, endrule="mean",align="center"),
+         "temp.7.min"= runmin(temp.min, k=7, align="center"),
+         "temp.7.max"= runmax(temp.max, k=7, align="center")) %>%
+  mutate("datetime"=ymd(strptime(paste0(year,"-", mon,"-", yday),
+                                 format = "%Y-%m-%j"))) %>%
+  select(datetime,year,mon,yday,lev.avg:temp.7.max) %>%  
+  as.data.frame()
 
