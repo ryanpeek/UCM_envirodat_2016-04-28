@@ -1,0 +1,108 @@
+---
+title: "Environmental Data Analysis"
+author: "Ryan Peek"
+date: '`r format(Sys.time(), "%Y-%m-%d %H:%M")`'
+output: 
+  ioslides_presentation:
+    logo: kells_113r_R.gif
+    widescreen: yes
+    incremental: yes
+runtime: shiny
+subtitle: Road Map to Data Analysis and Display
+---
+
+# Road Map to data collection, analysis and back... {.flexbox .vcenter .smaller}
+
+## {.smaller}
+
+<img src="moat-far-side.png" width="600" height="550" title="need a better map"/>
+
+
+## Need a Plan  {.smaller}
+
+*Road Map*
+
+ - Depends on the project & objective
+ - Who is the audience?
+ - What is endgoal  
+
+*Data Types*
+
+ - **Remote Sensing** (becoming immense and available widely) *BUT NEVER LEAVE YOUR HOUSE!*
+ - **Field Data**
+ - **Archival** (museums, libraries, reports, etc)
+ - **Meta-analysis**
+ 
+
+
+## World Maps (maps, ggmap, OpenStreetMap)
+
+```{r makemap1, echo=F, message=F, warning=F}
+
+## Data from Matt W
+# Site information: codes, geographic locations
+sites <- c('AK','BB','BC','FI','JN','JS','MA','NC','NN','PO','QU','SD','SW','VA','WA')
+lats  <- c(59.648,38.317,49.000,60.100,43.060,34.178,42.426,34.683,67.233,36.997,49.113,32.714,58.314,37.217,46.500)
+longs <- c(-151.436,-123.033,-123.100,21.700, 144.911-360,132.550-360,  # Note, Japanese site had to be adjusted by 360 degrees to work with "maps" package
+          -70.919,-76.600,15.200,-7.829,-68.179,-117.226, 11.548,-76.383,-124.000)  
+# Colors for Atlantic (blue) and Pacific (green) sites
+cols  = c(rep('green',3),'blue',rep('green',2),rep('blue',5),'green',rep('blue',2),'green')
+# Adjustments for site code text, so they can be offset slightly from actual locations
+adjx  <- c( -0.5,1.5,-0.5,-0.5,-0.5,-0.5,-0.5,-0.5,1.5,1.5,1.5,1.5,1.5,-0.5,1.5 )
+adjy  <- c(  1.2,0.5,-0.5,-0.5, 0.5, 1.2, 0.8, 0.7,0.5,0.5,0.5,  1,1.2, 0.3,0.5 )
+     
+# Wrap Site info into a data.frame
+sitelist <- data.frame( site=sites, lat=lats, long=longs, cols=cols, adjx=adjx, adjy=adjy )
+
+# coerce colors into a character vector because default is factor
+sitelist$cols <- as.character( sitelist$cols )
+
+#library(googleVis)
+library(ggmap)
+library(maps)
+
+## GGMAP
+al1<-get_map(location = 'U.S.', zoom = 3, maptype = "terrain")
+map<-ggmap(al1)
+
+# prob need to tweak this a bit
+map+geom_point(data=sitelist, aes(x=long, y=lat), color=sitelist$cols, pch=16, size=6)+
+  geom_text(data=sitelist, aes(x=(long-adjx), y=(lat-adjy), label=site))
+```
+
+## How did that work?
+
+### <b>
+
+```sitelist <- data.frame( site=sites, lat=lats, long=longs, cols=cols,
+  adjx=adjx, adjy=adjy)```  
+  
+### </b>  
+
+
+## Plot on a Worldmap
+
+```{r makemap2, echo=F, message=F, warning=F}
+
+world <- map_data("world")
+
+## add points and text to world map
+worldmap <- ggplot(world, aes(x=long, y=lat, group=group)) + 
+  geom_path() + # this is the polygons of countries/continents (the group=group is important part)
+  geom_point(data=sitelist, aes(x=long, y=lat, group=cols), fill=sitelist$cols,pch=21, size=5)+ # add sites
+  geom_text(data=sitelist, aes(label=site, x=long-adjx, y=lat-adjy, group=cols), col="red4", fontface=2, hjust=0.05, vjust=0)+ # add site labels with slight adjustment
+  scale_y_continuous(breaks=(-2:2) * 30) + # make a nice scale
+  scale_x_continuous(breaks=(-4:4) * 45)
+
+# plot it!
+worldmap + theme_bw() # making background white
+```
+
+## Different projection
+
+```{r makemap3, echo=F, message=F, warning=F}
+
+# make a different projection, this is a wrapped view
+worldmap + coord_map("ortho")
+
+```
