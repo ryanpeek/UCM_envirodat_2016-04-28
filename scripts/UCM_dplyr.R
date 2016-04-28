@@ -13,22 +13,20 @@ d
 head(d)
 summary(d)
 
-# What are the differences in data types of columns when using `read.csv` vs `read_csv`? Especially compare character or factor data types. For an intriguing read into the perils of using factors, check out level 8.2 of the [R_inferno.pdf](http://www.burns-stat.com/pages/Tutor/R_inferno.pdf) 9 levels of hell in R (yes, a [Dante reference](https://en.wikipedia.org/wiki/Inferno_(Dante))).
-
+# What are the differences in data types of columns when using `read.csv` vs `read_csv`? Especially compare character or factor data types. For an intriguing read into the perils of using factors, check out level 8.2 of the (http://www.burns-stat.com/pages/Tutor/R_inferno.pdf) 9 levels of hell in R.
 
 # OKAY NOW LET"S PROCESS DATA ---------------------------------------------
 
-#```{r pseudocode, eval=F}
-# read in csv
-# view data
-# limit columns to species and year
-# limit rows to just species "NL"
-# get count per year
-# write out csv
-#```
+## STEPS TO PROCESSING
+# 1. read in csv
+# 2. view data
+# 3. limit columns to species and year
+# 4. limit rows to just species "NL"
+# 5. get count per year
+# 6. write out csv
 
 # read in csv
-surveys = read.csv('../data/r-ecology/surveys.csv') 
+surveys = read.csv('./data/r-ecology/surveys.csv') 
 
 # view data
 head(surveys)
@@ -50,7 +48,7 @@ write.csv(surveys_4, 'data/surveys_bbest.csv', row.names = FALSE)
 # NESTED FUNCTIONS --------------------------------------------------------
 
 # read in data
-surveys = read.csv('../data/r-ecology/surveys.csv') 
+surveys = read.csv('./data/r-ecology/surveys.csv') 
 
 # view data
 head(surveys)
@@ -70,8 +68,7 @@ write.csv(
 
 ### EDAWR
 
-# ```{r EDAWR}
-# # install.packages("devtools")
+# install.packages("devtools")
 devtools::install_github("rstudio/EDAWR")
 library(EDAWR)
 # help(package='EDAWR')
@@ -79,56 +76,31 @@ library(EDAWR)
 # ?cases     # subset of WHO tuberculosis
 # ?pollution # pollution data from WHO Ambient Air Pollution, 2014
 # ?tb        # tuberculosis data
-View(storms)
+head(storms)
 View(cases)
 View(pollution)
-# ```
-# 
-# ### slicing
-# 
-# ```{r traditional R slicing}
-# # storms
-# storms$storm
-# storms$wind
-# storms$pressure
-# storms$date
-# 
-# # cases
-# cases$country
-# names(cases)[-1]
-# unlist(cases[1:3, 2:4])
-# 
-# # pollution
-# pollution$city[c(1,3,5)]
-# pollution$amount[c(1,3,5)]
-# pollution$amount[c(2,4,6)]
-# 
-# # ratio
-# storms$pressure / storms$wind
-# ```
-# 
-# ```{r dplyr on storms}
-# # better yet
-# library(dplyr)
-# 
-# pollution %>%
-#   filter(city != 'New York') %>%
-#   mutate(
-#     ratio = pressure / wind)
 
+# slicing data: done with base R
 
+## storms
+storms$storm
+storms$wind
+storms$pressure
+storms$date
 
+## cases
+cases$country
+names(cases)[-1]
+unlist(cases[1:3, 2:4])
+ 
+## pollution
+pollution$city[c(1,3,5)]
+pollution$amount[c(1,3,5)]
+pollution$amount[c(2,4,6)]
+ 
+## ratio
+storms$pressure / storms$wind
 
-# read co2
-library(dplyr)
-library(readxl) # install.packages('readxl')
-
-# xls downloaded from http://edgar.jrc.ec.europa.eu/news_docs/CO2_1970-2014_dataset_of_CO2_report_2015.xls
-xls = './data/co2_europa.xls'
-
-print(getwd())
-co2 = read_excel(xls, skip=12) # why skip 12?
-co2
 
 # DPLYR 1 -----------------------------------------------------------------
 
@@ -136,6 +108,23 @@ co2
 library(readr)
 library(dplyr)
 library(magrittr) # for %T>%
+
+pollution %>%
+  filter(city != 'New York') %>%
+  group_by(size) %>% 
+  summarize(
+    mean_amount = mean(amount))
+
+# read co2
+library(readxl) # install.packages('readxl')
+
+# xls downloaded from http://edgar.jrc.ec.europa.eu/news_docs/CO2_1970-2014_dataset_of_CO2_report_2015.xls
+
+xls = './data/co2_europa.xls'
+
+print(getwd())
+co2 = read_excel(xls, skip=12) # why skip 12?
+co2
 
 # read in csv
 surveys = read_csv('./data/surveys.csv') 
@@ -161,7 +150,6 @@ surveys2 = read_csv('./data/surveys_rpeek.csv')
 
 # DPLYR 2 -----------------------------------------------------------------
 
-# install.packages("dplyr")
 library(dplyr)
 ?select
 ?filter
@@ -170,109 +158,73 @@ library(dplyr)
 ?group_by
 ?summarise
 
-
-
 # - Subset Variables (Columns), eg `select()`
 # - Subset Observations (Rows), eg `filter()`
 # - Reshaping Data - Change the layout of a data set, eg `arrange()`
 # - Make New Variables, eg `mutate()`
 # - Group Data, eg `group_by()` and `summarise()`
-# 
-# ### `select`
-# 
-# ```{r select}
-# storms
-# select(storms, storm, pressure)
-# storms %>% select(storm, pressure)
-# ```
-# 
-# ### `filter`
-# 
-# ```{r filter}
-# storms
-# filter(storms, wind >= 50)
-# storms %>% filter(wind >= 50)
-# 
-# storms %>%
-#   filter(wind >= 50) %>%
-#   select(storm, pressure)
-# ```
-# 
-# ### `mutate`
-# 
-# ```{r mutate}
-# storms %>%
-#   mutate(ratio = pressure / wind) %>%
-#   select(storm, ratio)
-# ```
-# 
-# ### `group_by`
-# 
-# ```{r group_by}
-# pollution
-# pollution %>% group_by(city)
-# ```
-# 
-# ### `summarise`
-# 
-# ```{r summarise}
-# # by city
-# pollution %>% 
-#   group_by(city) %>%
-#   summarise(
-#     mean = mean(amount), 
-#     sum = sum(amount), 
-#     n = n())
-# 
-# # by size
-# pollution %>% 
-#   group_by(size) %>%
-#   summarise(
-#     mean = mean(amount), 
-#     sum = sum(amount), 
-#     n = n())
-# ```
-# 
+ 
+## `select`
+ 
+storms
+select(storms, storm, pressure)
+storms %>% select(storm, pressure)
+
+## `filter`
+storms
+filter(storms, wind >= 50)
+storms %>% filter(wind >= 50)
+
+storms %>%
+  filter(wind >= 50) %>%
+  select(storm, pressure)
+
+## `mutate`
+storms %>%
+  mutate(ratio = pressure / wind) %>%
+  select(storm, ratio)
+
+## `group_by`
+pollution
+pollution %>% group_by(city)
+
+## `summarise`
+
+# by city
+pollution %>%
+  group_by(city) %>%
+  summarise(
+    mean = mean(amount),
+    sum = sum(amount),
+    n = n())
+
+# by size
+pollution %>%
+  group_by(size) %>%
+  summarise(
+    mean = mean(amount),
+    sum = sum(amount),
+    n = n())
+
 # note that `summarize` synonymously works
-# 
-# ### `ungroup`
-# 
-# ```{r ungroup}
-# pollution %>% 
-#   group_by(size)
-# 
-# pollution %>% 
-#   group_by(size) %>%
-#   ungroup()
-# ```
-# 
-# ### multiple groups
-# 
-# ```{r multiple groups}
-# tb %>%
-#   group_by(country, year) %>%
-#   summarise(cases = sum(cases))
-# summarise(cases = sum(cases))
-# ```
-# 
-# **Recap: dplyr**:
-#   
-#   - Extract columns with `select()` and rows with `filter()`
-# 
+## `ungroup`
+
+pollution %>%
+  group_by(size)
+
+pollution %>%
+  group_by(size) %>%
+  ungroup()
+
+# Recap: dplyr
+# - Extract columns with `select()` and rows with `filter()`
 # - Sort rows by column with `arrange()`
-# 
 # - Make new columns with `mutate()`
-# 
 # - Group rows by column with `group_by()` and `summarise()`
-# 
 # See sections in the [data-wrangling-cheatsheet.pdf](./refs/cheatsheets/data-wrangling-cheatsheet.pdf):
-#   
-#   - Subset Variables (Columns), eg `select()`
-# 
+
+# - Subset Variables (Columns), eg `select()`
 # - Subset Observations (Rows), eg `filter()`
-# 
 # - Reshaping Data - Change the layout of a data set, eg `arrange()`
-# 
 # - Make New Variables, eg `mutate()`
-# 
 # - Group Data, eg `group_by()` and `summarise()`
