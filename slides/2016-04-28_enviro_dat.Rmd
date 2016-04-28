@@ -13,9 +13,36 @@ subtitle: Road Map to Data Analysis and Display
 
 # Road Map to data collection, analysis and back... {.flexbox .vcenter .smaller}
 
-## {.smaller}
+## All Plans are *Not* Equal {.smaller}
 
 <img src="moat-far-side.png" width="600" height="550" title="need a better map"/>
+
+## Overview: R Organization and Github
+
+File structure is a key component to keeping your life in control. A few tips:  
+
+ - use version control (Github)
+ - use the same folder set for each project/class you work on 
+ ![pic]("folder_struct.PNG")
+ - stick with it and keep it simple 
+
+## Overview: tidyr-dplyr
+
+We'll talk more about the amazing packages (largely written by Hadley Wickham)  
+ 
+ - `readr`: read in all sorts of data types, *xls, csv, txt*
+ - `tidyr`: arrange, cut and reshape data from wide to long
+ - `dplyr`: do everything else in summarizing/analyzing data
+ 
+## Overview: Mapping
+
+Making maps is fun. Let's look at a few examples.
+
+## Overview: RMarkdown & Shiny
+
+Tie it all together in an RMarkdown document, which you can then spit out as pdf, html, slides, etc.
+
+See [cheatsheet](http://www.rstudio.com/wp-content/uploads/2016/03/rmarkdown-cheatsheet-2.0.pdf).
 
 
 ## Need a Plan  {.smaller}
@@ -24,16 +51,139 @@ subtitle: Road Map to Data Analysis and Display
 
  - Depends on the project & objective
  - Who is the audience?
- - What is endgoal  
+ - What is endgoal?  
 
-*Data Types*
+# Reading/Formatting Data
 
- - **Remote Sensing** (becoming immense and available widely) *BUT NEVER LEAVE YOUR HOUSE!*
- - **Field Data**
- - **Archival** (museums, libraries, reports, etc)
- - **Meta-analysis**
+## `readr` {.smaller}
+
+**Using readr vs. base R** 
+
+```{r readr, eval=T, echo=T, message=F, warning=F}
+
+# base R
+library(readr)
+d = read.csv(".././data/species.csv")
+
+str(d)
+
+```
+
+## `readr` {.smaller}
+
+**Using readr vs. base R** 
+
+```{r readr2, eval=T, echo=T, message=F, warning=F}
+
+# what's different here?
+library(readr)
+dd = read_csv('.././data/species.csv')
+
+str(dd)
+
+```
+
+## `tidyr`
+
+```{r pseudocode, eval=T, echo=T}
+
+# read in csv
+# view data
+# limit columns to species and year
+# limit rows to just species "NL"
+# get count per year
+# write out csv
+
+```
+
+## `tidyr` continued...
+
+```{r EDAWR}
+# install.packages("devtools")
+# devtools::install_github("rstudio/EDAWR")
+library(EDAWR)
+library(knitr)
+# ?storms    # wind speed data for 6 hurricanes
+# ?cases     # subset of WHO tuberculosis
+# ?pollution # pollution data from WHO Ambient Air Pollution, 2014
+# ?tb        # tuberculosis data
+kable(storms)
+
+(cases)
+(pollution)
+
+```
+
+## tidyr: Slicing 
  
+```{r traditional R slicing}
 
+library(EDAWR)
+
+# storms
+storms$storm
+storms$wind
+storms$pressure
+storms$date
+
+# cases 
+cases$country
+names(cases)[-1]
+unlist(cases[1:3, 2:4])
+ 
+# pollution
+pollution$city[c(1,3,5)]
+pollution$amount[c(1,3,5)]
+pollution$amount[c(2,4,6)]
+
+```
+
+# DPLYR
+
+## `dplyr` verbs {.smaller}
+
+```{R dplyr verbs, eval=F, echo=T}
+# install.packages("dplyr")
+library(dplyr)
+?select
+?filter
+?arrange
+?mutate
+?group_by
+?summarise
+
+```
+
+ - Subset Variables (Columns), eg `select()`
+ - Subset Observations (Rows), eg `filter()`
+ - Reshaping Data - Change the layout of a data set, eg `arrange()`
+ - Make New Variables, eg `mutate()`
+ - Group Data, eg `group_by()` and `summarise()`
+
+## More detailed `dplyr`
+
+```{r dplyr fullsteps, eval=F, echo=T}
+
+# load libraries
+library(readr)
+library(dplyr)
+library(magrittr) # for %T>%
+
+# read in csv
+surveys = read_csv('.././data/surveys.csv') 
+
+# dplyr elegance
+surveys %T>%                          # note tee operator %T>% for glimpse
+  glimpse() %>%                       # view data
+  select(species_id, year) %>%        # limit columns
+  filter(species_id  == 'NL') %>%     # limit rows
+  group_by(year) %>%                  # get count by first grouping
+  summarize(n = n()) %>%              #   then summarize
+  write_csv('.././data/surveys_rpeek.csv') # write out csv
+
+```
+
+# Mapping
 
 ## World Maps (maps, ggmap, OpenStreetMap)
 
@@ -57,7 +207,7 @@ sitelist <- data.frame( site=sites, lat=lats, long=longs, cols=cols, adjx=adjx, 
 # coerce colors into a character vector because default is factor
 sitelist$cols <- as.character( sitelist$cols )
 
-#library(googleVis)
+library(googleVis)
 library(ggmap)
 library(maps)
 
@@ -69,15 +219,6 @@ map<-ggmap(al1)
 map+geom_point(data=sitelist, aes(x=long, y=lat), color=sitelist$cols, pch=16, size=6)+
   geom_text(data=sitelist, aes(x=(long-adjx), y=(lat-adjy), label=site))
 ```
-
-## How did that work?
-
-### <b>
-
-```sitelist <- data.frame( site=sites, lat=lats, long=longs, cols=cols,
-  adjx=adjx, adjy=adjy)```  
-  
-### </b>  
 
 
 ## Plot on a Worldmap
@@ -106,3 +247,14 @@ worldmap + theme_bw() # making background white
 worldmap + coord_map("ortho")
 
 ```
+
+## Thanks!
+
+Some great resources are out there:
+
+ - Data Carpentry/Software Carpentry
+ - RStudio
+ - RCookbook
+ - GOOGLE
+ 
+ 

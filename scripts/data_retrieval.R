@@ -84,6 +84,29 @@ save(dfALL, file = "./data/Merced_usgs_2006-2016.rda")
 
 # DO SOME DPLYR ----------------------------------------------------------
 
+
+df<-read.csv("./data/2015_TUO_solinst_12_17.csv", skip = 11)
+head(df)
+
+# lubridate
+library(lubridate)
+df$Datetime<-paste(df$Date," ",df$Time,sep="")
+df$Datetime<-mdy_hms(df$Datetime)
+
+## Potential col names
+loggercols<-c("Datetime","Level","Temperature","LEVEL","TEMPERATURE")
+df<-data.frame(df[, colnames(df) %in% loggercols]) ## Select columns
+df<-df[,c(3,1,2)] # reorder
+colnames(df)<-c("Datetime","Level","Temperature") # rename
+summary(df)
+
+## Add other columns for processing
+df$year<-year(df$Datetime)
+df$mon<-month(df$Datetime)
+df$yday<-yday(df$Datetime)
+df$hour<-hour(df$Datetime)
+df$site<-as.factor("TUOLUMNE")
+
 ## Make Hourly dataset
 df.hr<- df %>%
   group_by(site,year, mon, yday, hour)%>%

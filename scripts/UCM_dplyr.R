@@ -15,6 +15,9 @@ summary(d)
 
 # What are the differences in data types of columns when using `read.csv` vs `read_csv`? Especially compare character or factor data types. For an intriguing read into the perils of using factors, check out level 8.2 of the [R_inferno.pdf](http://www.burns-stat.com/pages/Tutor/R_inferno.pdf) 9 levels of hell in R (yes, a [Dante reference](https://en.wikipedia.org/wiki/Inferno_(Dante))).
 
+
+# OKAY NOW LET"S PROCESS DATA ---------------------------------------------
+
 #```{r pseudocode, eval=F}
 # read in csv
 # view data
@@ -63,47 +66,22 @@ write.csv(
   row.names = FALSE)
 
 
-# DPLYR 1 -----------------------------------------------------------------
-
-# load libraries
-library(readr)
-library(dplyr)
-library(magrittr) # for %T>%
-
-# read in csv
-surveys = read_csv('./data/surveys.csv') 
-
-# dplyr elegance
-surveys %T>%                          # note tee operator %T>% for glimpse
-  glimpse() %>%                       # view data
-  select(species_id, year) %>%        # limit columns
-  filter(species_id  == 'NL') %>%     # limit rows
-  group_by(year) %>%                  # get count by first grouping
-  summarize(n = n()) %>%              #   then summarize
-  write_csv('data/surveys_rpeek.csv') # write out csv
-
-# The "tee" operator `%T>%` is similar to the "then" operator `%>%` in that the left side is passed to the right, but is then also teed off as the output of the right side. This is useful in this case for `glimpse` since its output is simply printed to the Console and does not otherwise return the data frame needed to continue the sequence of operations. So the "tee" operator `%T>%` is most useful for injecting intermediate operations like printing or plotting that wouldn't otherwise output a return object for continuing operations.
-
-# note %<>% operator writing back to same name
-
-
-surveys2 = read_csv('./data/surveys_rpeek.csv') 
 # TIDYR -------------------------------------------------------------------
 
 ### EDAWR
 
 # ```{r EDAWR}
 # # install.packages("devtools")
-# # devtools::install_github("rstudio/EDAWR")
-# library(EDAWR)
+devtools::install_github("rstudio/EDAWR")
+library(EDAWR)
 # help(package='EDAWR')
 # ?storms    # wind speed data for 6 hurricanes
 # ?cases     # subset of WHO tuberculosis
 # ?pollution # pollution data from WHO Ambient Air Pollution, 2014
 # ?tb        # tuberculosis data
-# View(storms)
-# View(cases)
-# View(pollution)
+View(storms)
+View(cases)
+View(pollution)
 # ```
 # 
 # ### slicing
@@ -152,9 +130,36 @@ print(getwd())
 co2 = read_excel(xls, skip=12) # why skip 12?
 co2
 
+# DPLYR 1 -----------------------------------------------------------------
+
+# load libraries
+library(readr)
+library(dplyr)
+library(magrittr) # for %T>%
+
+# read in csv
+surveys = read_csv('./data/surveys.csv') 
+
+# dplyr elegance
+surveys %T>%                          # note tee operator %T>% for glimpse
+  glimpse() %>%                       # view data
+  select(species_id, year) %>%        # limit columns
+  filter(species_id  == 'NL') %>%     # limit rows
+  group_by(year) %>%                  # get count by first grouping
+  summarize(n = n()) %>%              #   then summarize
+  write_csv('data/surveys_rpeek.csv') # write out csv
+
+# The "tee" operator `%T>%` is similar to the "then" operator `%>%` in that the left side is passed to the right, 
+# but is then also teed off as the output of the right side. This is useful in this case for `glimpse` since its 
+# output is simply printed to the Console and does not otherwise return the data frame needed to continue the sequence of operations. So the "tee" operator `%T>%` is most useful for injecting intermediate operations like printing or plotting that wouldn't otherwise output a return object for continuing operations.
+
+# note %<>% operator writing back to same name
 
 
-# DPLYR -------------------------------------------------------------------
+surveys2 = read_csv('./data/surveys_rpeek.csv') 
+
+
+# DPLYR 2 -----------------------------------------------------------------
 
 # install.packages("dplyr")
 library(dplyr)
