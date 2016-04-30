@@ -26,11 +26,12 @@ summary(d)
 # 6. write out csv
 
 # read in csv
-surveys = read.csv('./data/r-ecology/surveys.csv') 
+surveys = read.csv('./data/surveys.csv') 
 
 # view data
 head(surveys)
 summary(surveys)
+str(surveys)
 
 # limit columns to species and year
 surveys_2 = surveys[,c('species_id', 'year')]
@@ -42,13 +43,13 @@ surveys_3 = surveys_2[surveys_2$species_id  == 'NL',]
 surveys_4 = aggregate(species_id ~ year, data=surveys_3, FUN='length')
 
 # write to csv
-write.csv(surveys_4, 'data/surveys_bbest.csv', row.names = FALSE)
+write.csv(surveys_4, 'data/surveys_rapeek.csv', row.names = FALSE)
 
 
 # NESTED FUNCTIONS --------------------------------------------------------
 
 # read in data
-surveys = read.csv('./data/r-ecology/surveys.csv') 
+surveys = read.csv('./data/surveys.csv') 
 
 # view data
 head(surveys)
@@ -60,8 +61,12 @@ write.csv(
     species_id ~ year, 
     data = surveys[surveys_2$species_id  == 'NL', c('species_id', 'year')], 
     FUN = 'length'), 
-  'data/surveys_bbest.csv',
+  'data/surveys_rapeek.csv',
   row.names = FALSE)
+
+library(dplyr)
+
+
 
 
 # TIDYR -------------------------------------------------------------------
@@ -113,7 +118,8 @@ pollution %>%
   filter(city != 'New York') %>%
   group_by(size) %>% 
   summarize(
-    mean_amount = mean(amount))
+    mean_amount = mean(amount),
+    min = min(amount))
 
 # read co2
 library(readxl) # install.packages('readxl')
@@ -130,13 +136,13 @@ co2
 surveys = read_csv('./data/surveys.csv') 
 
 # dplyr elegance
-surveys %T>%                          # note tee operator %T>% for glimpse
-  glimpse() %>%                       # view data
+surveys %>%                          # note tee operator %T>% for glimpse
   select(species_id, year) %>%        # limit columns
   filter(species_id  == 'NL') %>%     # limit rows
   group_by(year) %>%                  # get count by first grouping
-  summarize(n = n()) %>%              #   then summarize
-  write_csv('data/surveys_rpeek.csv') # write out csv
+  summarize(n = n()) %T>%              #   then summarize
+  glimpse() %>%                       # view data
+  write_csv('data/surveys_rpeek2.csv') # write out csv
 
 # The "tee" operator `%T>%` is similar to the "then" operator `%>%` in that the left side is passed to the right, 
 # but is then also teed off as the output of the right side. This is useful in this case for `glimpse` since its 

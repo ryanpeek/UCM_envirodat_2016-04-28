@@ -61,7 +61,7 @@ legend("topleft", variableInfo$param_units,
 source("scripts/functions/f_USGS_15min.R")
 
 # need to do this in about 5-6 yr chunks...too big otherwise
-get.USGS(river = "Merced", gage = "11264500", sdate="2009-10-01") # get 15 min data
+get.USGS(river = "Merced", gage = "11264500", sdate="2009-10-01", saveHrly = TRUE) # get 15 min data
 
 Merced15<-Merced_15 # rename so we can get the other chunk
 
@@ -83,6 +83,15 @@ save(dfALL, file = "./data/Merced_usgs_2006-2016.rda")
 
 
 # DO SOME DPLYR ----------------------------------------------------------
+
+source("./scripts/functions/f_make_Hrly_Daily_v2.R")
+
+make.Hrly.Daily(site = "TUO", skip = 11)
+
+
+
+
+
 
 
 df<-read.csv("./data/2015_TUO_solinst_12_17.csv", skip = 11)
